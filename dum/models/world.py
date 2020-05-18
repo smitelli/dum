@@ -43,6 +43,7 @@ class World(object):
         return player
 
     def remove_player(self, player):
+        player.room.player_exit(player)
         del self.player_index[player.uid]
 
     def generate_origin_room(self):
