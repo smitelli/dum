@@ -50,6 +50,8 @@ To connect to a DUM server from a different machine, substitute the server IP ad
     telnet 192.168.42.42 8123
     telnet triton 8123
 
+(Many modern operating systems don't ship with a Telnet client by default, which is a dumb tragedy. It should be possible to use `netcat` or `nc` to do the same thing, provided it transmits CRLF when the Enter key is pressed. `nc -C` achieves that on my system, YMMV.)
+
 If connection is successful, a brief intro will appear followed by the `dum>` prompt. Any of the following commands can be used:
 
 * **name {str}:** View or set the player name. `name` by itself shows the current player name, and `name perljam` sets the player name to perljam.
