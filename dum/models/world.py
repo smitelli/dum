@@ -1,7 +1,7 @@
 import logging
 import random
-from dum.models.player import Player
-from dum.models.room import Room, RoomPlaceholder
+from .player import Player
+from .room import Room, RoomPlaceholder
 
 DIRECTIONS = {
     'NORTH': 'n',
@@ -46,11 +46,17 @@ class World(object):
         del self.player_index[player.uid]
 
     def generate_origin_room(self):
-        room = self.room_index[(0, 0)] = Room({
-            'pos_x': 0,
-            'pos_y': 0})
+        while True:
+            room = self.room_index[(0, 0)] = Room({
+                'pos_x': 0,
+                'pos_y': 0})
 
-        self.populate_room(room)
+            self.populate_room(room)
+
+            if len(room.doors) == 0:
+                logger.debug('Origin room had 0 doors; trying again')
+            else:
+                break
 
         return room
 
@@ -125,5 +131,6 @@ class World(object):
     @staticmethod
     def maybe(probability):
         return probability[0] > random.randint(0, probability[1])
+
 
 world_instance = World()

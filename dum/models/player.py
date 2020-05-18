@@ -9,13 +9,23 @@ class Player(object):
             attrs = {}
 
         self.uid = attrs.get('uid', 0)
+        self.name = 'Player {}'.format(self.uid)
         self.room = attrs.get('room')
-        self.items = attrs.get('items', [])
+        self.room.player_enter(self)
 
         self._log('Instantiated')
 
+    def __str__(self):
+        return self.name
+
     def move(self, direction):
-        self.room = self.room.get_adjacent_room(direction)
+        old_room = self.room
+        new_room = self.room.get_adjacent_room(direction)
+
+        old_room.player_exit(self)
+        self.room = new_room
+        new_room.player_enter(self)
+
         self._log('Move `%s` OK', direction)
 
     def _log(self, *args, **kwargs):

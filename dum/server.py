@@ -3,7 +3,7 @@ import textwrap
 from twisted.internet import reactor
 from twisted.internet.protocol import Factory
 from twisted.protocols.basic import LineReceiver
-from game import Game
+from dum.game import Game
 
 logger = logging.getLogger()
 
@@ -66,9 +66,10 @@ class GameFactory(Factory):
 
 
 def run():
-    logger.info('Starting dum telnet server')
+    logger.info('Starting dum telnet server on port 8123')
     reactor.listenTCP(8123, GameFactory())
     reactor.run()
+
 
 if __name__ == '__main__':
     run()

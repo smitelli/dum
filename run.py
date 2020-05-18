@@ -1,6 +1,6 @@
 import logging
 import sys
-from dum import server
+import dum.server
 
 
 logger = logging.getLogger()
@@ -14,4 +14,4 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-server.run()
+dum.server.run()

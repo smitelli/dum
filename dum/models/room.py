@@ -19,11 +19,14 @@ class Room(object):
         self.pos_x = attrs.get('pos_x', 0)
         self.pos_y = attrs.get('pos_y', 0)
         self.doors = attrs.get('doors', {})
-        self.items = attrs.get('items', [])
+        self.players = attrs.get('players', {})
 
         self._log('Instantiated')
 
     def get_adjacent_room(self, direction):
+        # Avoid circular import
+        from .world import world_instance as world
+
         try:
             room = self.doors[direction]
         except KeyError:
@@ -33,11 +36,21 @@ class Room(object):
         self._log('Found door to `%s`', direction)
 
         if isinstance(room, RoomPlaceholder):
-            from dum.models.world import world_instance as world
             room = world.generate_room(src_room=self, direction=direction)
             self._log('New room to `%s` generated OK', direction)
 
         return room
+
+    def player_enter(self, player):
+        self.players[player.uid] = player
+
+    def player_exit(self, player):
+        try:
+            self.players.pop(player.uid)
+        except KeyError:
+            self._log(
+                'Tried to pop player %d who is not in room', player.uid,
+                level='error')
 
     def _log(self, *args, **kwargs):
         args = list(args)

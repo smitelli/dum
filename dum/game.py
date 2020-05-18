@@ -39,7 +39,9 @@ class Game(object):
             r"         ||.=='    _-'                                    `' |  /==.||" '\r\n'
             r"         =='    _-'                                           \/   `==" '\r\n'
             r"         \   _-'                                               `-_   /" '\r\n'
-            r"          `''                                                     ``' ",
+            r"          `''                                                     ``' " '\r\n'
+            '\r\n'
+            'Your name is {}. Use `name` to change it.'.format(str(self.player)),
             prompt=None)
         self.look()
 
@@ -48,10 +50,14 @@ class Game(object):
         world.remove_player(self.player)
 
     def line_received(self, line):
-        line = re.sub('\s+', ' ', line)
+        line = re.sub(r'\s+', ' ', line)
 
         if not line:
             self.protocol.dum_respond()
+            return
+        elif line.startswith('name'):
+            name = ' '.join(line.split(' ')[1:])
+            self.set_name(name)
             return
         elif line == 'look':
             self.look()
@@ -63,17 +69,26 @@ class Game(object):
         elif line == 'help':
             self.help()
             return
-        elif line == 'quit':
+        elif line in ('quit', 'exit', 'bye'):
             self.quit()
             return
 
         self._log('Bad command `%s`', line)
         self.protocol.dum_respond("Sorry, I didn't catch that.")
 
+    def set_name(self, name):
+        if not name:
+            self.protocol.dum_respond('Your name is {}.'.format(self.player.name))
+        else:
+            self._log('Player %d changes name from `%s` to `%s`')
+            self.player.name = name
+            self.protocol.dum_respond('Pleased to meet you, {}.'.format(name))
+
     def look(self):
         self._log('Looking')
         self.protocol.dum_respond(
-            'You are in a room. {}'.format(self._list_doors()))
+            'You are in a room. {} {}'.format(
+                self._list_doors(), self._list_room_players()))
 
     def walk(self, noun):
         noun = noun.lower()
@@ -132,6 +147,7 @@ class Game(object):
         self.protocol.dum_respond(
             'The following commands are available\r\n'
             '====================================\r\n'
+            '  name <str>  Set your name to <str>.\r\n'
             '  look        Look around the room.\r\n'
             '  walk <dir>  Move to a different room. <dir> should be a cardinal direction\r\n'
             '              like `north` or any abbreviation of such a word.\r\n'
@@ -163,6 +179,17 @@ class Game(object):
             self._log('%d doors', len(doors))
             return 'There are doors to the {} and {}.'.format(
                 ', '.join(doors[:-1]), doors[-1])
+
+    def _list_room_players(self):
+        names = [str(p) for p in self.player.room.players.values() if p is not self.player]
+
+        if len(names) == 0:
+            self._log('no other players in this room')
+            return ''
+        else:
+            self._log('%d other player(s) in this room')
+            return 'You are not alone here. Say hello to {}.'.format(
+                ', '.join(names))
 
     def _log(self, *args, **kwargs):
         args = list(args)
